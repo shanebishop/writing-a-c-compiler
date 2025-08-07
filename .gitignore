@@ -1,1 +1,6 @@
 /target
+
+# Test C, assembly, or preprocessed files
+*.c
+*.i
+*.s
