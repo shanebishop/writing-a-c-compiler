@@ -3,5 +3,13 @@
 version = 4
 
 [[package]]
-name = "writing-a-c-compiler"
+name = "driver"
+version = "0.1.0"
+
+[[package]]
+name = "lexer"
+version = "0.1.0"
+
+[[package]]
+name = "parser"
 version = "0.1.0"
