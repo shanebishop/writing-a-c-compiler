@@ -103,7 +103,12 @@ name = "driver"
 version = "0.1.0"
 dependencies = [
  "clap",
+ "errors",
 ]
+
+[[package]]
+name = "errors"
+version = "0.1.0"
 
 [[package]]
 name = "heck"

@@ -1,0 +1,2 @@
+[build]
+rustflags = ["-Dunused_must_use"]

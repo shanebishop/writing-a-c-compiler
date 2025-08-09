@@ -4,3 +4,7 @@
 *.c
 *.i
 *.s
+
+# Version control C files in test_c_source
+test_c_source/**
+!test_c_source/*.c
