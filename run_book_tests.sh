@@ -8,4 +8,4 @@ test -d book_tests || {
     git submodule update --init --recursive
 }
 
-book_tests/test_compiler target/debug/driver --chapter 1 --stage lex
+book_tests/test_compiler target/debug/driver "$@"
