@@ -1,2 +1,5 @@
 [build]
 rustflags = ["-Dunused_must_use"]
+
+[clippy.lints]
+type_complexity = "allow"

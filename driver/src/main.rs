@@ -1,5 +1,4 @@
 use clap::Parser;
-use std::borrow::Cow;
 use std::ffi::{OsStr, OsString};
 use std::path::Path;
 use std::process::{Command, exit};
@@ -38,15 +37,12 @@ fn main() {
     }
 }
 
-fn driver<'a>(driver_args: Args) -> Result<(), DriverError<'a>> {
+fn driver(driver_args: Args) -> Result<(), DriverError> {
     let source_path = Path::new(&driver_args.source_path);
     if !source_path.is_file() {
         return Err(DriverError {
             exit_code: 1,
-            msg: Cow::Owned(format!(
-                "fatal: \"{}\" is not a file.",
-                driver_args.source_path
-            )),
+            msg: format!("fatal: \"{}\" is not a file.", driver_args.source_path),
         });
     }
 
@@ -73,28 +69,20 @@ fn driver<'a>(driver_args: Args) -> Result<(), DriverError<'a>> {
         OsStr::new("-o"),
         &preprocessed_path,
     ];
-    let res = run_gcc(&args);
-    if let Err(e) = res {
-        return Err(DriverError {
-            msg: Cow::Owned(format!("Failed to run gcc preprocessing: {}.", e.msg)),
+    run_gcc(args).map_err(|e|
+        DriverError {
+            msg: format!("Failed to run gcc preprocessing: {}.", e.msg),
             ..e
-        });
-    }
+        }
+    )?;
 
-    // TODO Remove this stubbing
-    println!("Compiling...");
-    let mut assembly_path = OsString::from(output_path);
-    assembly_path.push(".s");
-    let args = [OsStr::new("-S"), OsStr::new("-O"), &preprocessed_path, OsStr::new("-o"), &assembly_path];
-    let res = run_gcc(&args);
-    if let Err(e) = res {
-        return Err(DriverError {
-            msg: Cow::Owned(format!("Failed to compile: {}.", e.msg)),
-            ..e
-        });
-    }
-
-    // Lexing will go here
+    println!("Tokenizing...");
+    let tokens = lexer::tokenize(preprocessed_path.as_os_str()).map_err(|_|
+        DriverError {
+            msg: "Lex step failed due to invalid token".to_string(),
+            exit_code: 1,
+        }
+    );
 
     if driver_args.lex {
         return Ok(());
@@ -112,24 +100,31 @@ fn driver<'a>(driver_args: Args) -> Result<(), DriverError<'a>> {
         return Ok(());
     }
 
+    // TODO Remove this stubbing
+    println!("Running stub compiler...");
+    let mut assembly_path = OsString::from(output_path);
+    assembly_path.push(".s");
+    let args = [OsStr::new("-S"), OsStr::new("-O"), &preprocessed_path, OsStr::new("-o"), &assembly_path];
+    run_gcc(args).map_err(|e|
+        DriverError {
+            msg: format!("Failed to compile: {}.", e.msg),
+            ..e
+        }
+    )?;
+
     // Assemble and link
     println!("Assembling and linking...");
-    let res = run_gcc(&[
-        &assembly_path,
-        OsStr::new("-o"),
-        &output_path,
-    ]);
-    if let Err(e) = res {
-        return Err(DriverError {
-            msg: Cow::Owned(format!("Failed to assemble and link: {}.", e.msg)),
+    run_gcc([&assembly_path, OsStr::new("-o"), output_path]).map_err(|e|
+        DriverError {
+            msg: format!("Failed to assemble and link: {}.", e.msg),
             ..e
-        });
-    }
+        }
+    )?;
 
     Ok(())
 }
 
-fn run_gcc<'a, I, S>(args: I) -> Result<(), DriverError<'a>>
+fn run_gcc<I, S>(args: I) -> Result<(), DriverError>
 where
     I: IntoIterator<Item = S>,
     S: AsRef<OsStr>,
@@ -137,15 +132,12 @@ where
     // Uncomment to debug run_gcc command
     // let args = dbg!(args.into_iter().map(|s| s.as_ref().to_owned()).collect::<Vec<_>>());
 
-    let status = match Command::new("gcc").args(args).status() {
-        Ok(status) => status,
-        Err(e) => {
-            return Err(DriverError {
-                exit_code: 1,
-                msg: Cow::Owned(format!("{e}")),
-            });
+    let status = Command::new("gcc").args(args).status().map_err(|e|
+        DriverError {
+            exit_code: 1,
+            msg: format!("{e}"),
         }
-    };
+    )?;
 
     if !status.success() {
         // On Unix, status.code() returns None if the process was killed
@@ -154,9 +146,9 @@ where
         return Err(DriverError {
             exit_code: status.code().unwrap_or(1),
             msg: if let Some(code) = status.code() {
-                Cow::Owned(format!("gcc terminated with exit code {code}"))
+                format!("gcc terminated with exit code {code}")
             } else {
-                Cow::Borrowed("gcc killed by some signal")
+                "gcc killed by some signal".to_string()
             },
         });
     }
@@ -168,19 +160,19 @@ where
 mod test {
     use super::*;
 
-    const BASIC_MAIN: &'static str =
+    const BASIC_MAIN: &str =
         concat!(env!("CARGO_MANIFEST_DIR"), "/../test_c_source/basic_main.c");
 
     #[test]
     fn test_run_gcc() {
-        run_gcc(&["-E", "-P", BASIC_MAIN, "-o", "/dev/null"]).unwrap();
+        run_gcc(["-E", "-P", BASIC_MAIN, "-o", "/dev/null"]).unwrap();
 
-        let err = run_gcc(&["-E", "-P", "invalid_path.c", "-o", "/dev/null"]).unwrap_err();
+        let err = run_gcc(["-E", "-P", "invalid_path.c", "-o", "/dev/null"]).unwrap_err();
         assert_eq!(
             err,
             DriverError {
                 exit_code: 1,
-                msg: Cow::Borrowed("gcc terminated with exit code 1")
+                msg: "gcc terminated with exit code 1".to_string()
             }
         );
     }
@@ -230,9 +222,8 @@ mod test {
             err,
             DriverError {
                 exit_code: 1,
-                msg: Cow::Borrowed(
-                    "Failed to run gcc preprocessing: gcc terminated with exit code 1."
-                )
+                msg: "Failed to run gcc preprocessing: gcc terminated with exit code 1."
+                    .to_string()
             }
         );
     }
@@ -252,7 +243,7 @@ mod test {
             err,
             DriverError {
                 exit_code: 1,
-                msg: Cow::Borrowed("Failed to parse. See errors above.")
+                msg: "Failed to parse. See errors above.".to_string()
             }
         );
     }
@@ -273,7 +264,7 @@ mod test {
             err,
             DriverError {
                 exit_code: 1,
-                msg: Cow::Owned(format!("fatal: \"{source_path}\" is not a file."))
+                msg: format!("fatal: \"{source_path}\" is not a file.")
             }
         );
     }

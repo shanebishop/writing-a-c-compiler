@@ -1,6 +1,4 @@
-pub fn parse() {
-
-}
+pub fn parse() {}
 
 #[cfg(test)]
 mod tests {
