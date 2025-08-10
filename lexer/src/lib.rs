@@ -77,8 +77,6 @@ static LEXER_MAP: std::sync::LazyLock<[LexerMapping; 10]> = std::sync::LazyLock:
 /// We need this function to work around unwraps not being allowed in static contexts.
 fn lexer_map() -> [LexerMapping; 10] {
     [
-        // Keywords must come before the identifier regex, otherwise keywords will
-        // be considered identifiers
         (Regex::new(r"\A(int\b)").unwrap(), |_| Token::IntKeyword),
         (Regex::new(r"\A(void\b)").unwrap(), |_| Token::VoidKeyword),
         (Regex::new(r"\A(return\b)").unwrap(), |_| {

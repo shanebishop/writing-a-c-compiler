@@ -3,6 +3,28 @@
 This repo contains the code for the C compiler project for the
 [_Writing a C Compiler_](https://norasandler.com/book/) book by Nora Sandler.
 
+## Cloning
+
+You can clone this without the book's tests with
+```bash
+git clone git@github.com:shanebishop/writing-a-c-compiler.git
+```
+Or, with an appropriately modern version of Git, you can also
+clone the book's tests with
+```bash
+git clone --recurse-submodules git@github.com:shanebishop/writing-a-c-compiler.git
+```
+To pull submodules after an intial clone, run
+```bash
+git submodule update --init --recursive
+```
+
+## Run tests
+
+To run unit tests, run `cargo test`.
+
+To run the book's tests, run `./run_book_tests.sh`.
+
 ## Code organization
 
 The code has been organized into the following crates:
