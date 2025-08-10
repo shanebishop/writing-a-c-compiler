@@ -1,0 +1,19 @@
+[package]
+name = "compiler-fuzz"
+version = "0.0.0"
+publish = false
+edition = "2024"
+
+[package.metadata]
+cargo-fuzz = true
+
+[dependencies]
+libfuzzer-sys = "0.4"
+lexer = { path = "../lexer" }
+
+[[bin]]
+name = "fuzz-tests"
+path = "fuzz_targets/fuzz_tests.rs"
+test = false
+doc = false
+bench = false

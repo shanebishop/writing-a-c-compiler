@@ -8,7 +8,7 @@ use errors::DriverError;
 #[derive(Debug, PartialEq)]
 pub enum Token {
     Identifier(String),
-    Constant(i64),
+    Constant(String),
     IntKeyword,
     VoidKeyword,
     ReturnKeyword,
@@ -28,7 +28,7 @@ struct TokenInfo {
 }
 
 #[derive(Debug, PartialEq)]
-struct LexError;
+pub struct LexError;
 
 impl From<LexError> for DriverError {
     fn from(_: LexError) -> Self {
@@ -41,7 +41,7 @@ pub fn tokenize(path: &OsStr) -> Result<Vec<Token>, DriverError> {
     Ok(tokenize_str(&source)?)
 }
 
-fn tokenize_str(input: &str) -> Result<Vec<Token>, LexError> {
+pub fn tokenize_str(input: &str) -> Result<Vec<Token>, LexError> {
     let mut input = input;
     let mut tokens = Vec::new();
 
@@ -86,7 +86,7 @@ fn lexer_map() -> [LexerMapping; 10] {
             Token::Identifier(s.to_owned())
         }),
         (Regex::new(r"\A([0-9]+\b)").unwrap(), |s| {
-            Token::Constant(s.parse().expect("expected integer constant"))
+            Token::Constant(s.to_owned())
         }),
         (Regex::new(r"\A(\()").unwrap(), |_| Token::OpenParenthesis),
         (Regex::new(r"\A(\))").unwrap(), |_| Token::CloseParenthesis),
@@ -220,7 +220,7 @@ mod tests {
         assert_eq!(
             find_token("123"),
             Some(TokenInfo {
-                token: Constant(123),
+                token: Constant("123".to_string()),
                 len: 3
             })
         );
@@ -244,7 +244,7 @@ mod tests {
                 CloseParenthesis,
                 OpenParenthesis,
                 OpenParenthesis,
-                Constant(99),
+                Constant("99".to_string()),
                 Semicolon,
                 Identifier("foo".to_string()),
                 IntKeyword,
@@ -252,5 +252,12 @@ mod tests {
                 Semicolon
             ])
         );
+    }
+
+    #[test]
+    fn test_tokenize_str_ugly_inputs() {
+        use Token::*;
+
+        assert_eq!(tokenize_str("55555555555555555504"), Ok(vec![Constant("55555555555555555504".to_string())]));
     }
 }

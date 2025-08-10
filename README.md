@@ -25,6 +25,9 @@ To run unit tests, run `cargo test`.
 
 To run the book's tests, run `./run_book_tests.sh`.
 
+To run fuzzing, run `cargo +nightly fuzz run fuzz-tests -- -max_total_time=2m`.
+Adjust the fuzzing total time as desired.
+
 ## Code organization
 
 The code has been organized into the following crates:
