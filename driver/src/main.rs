@@ -25,6 +25,12 @@ struct Args {
     /// generation, but stop before code emission
     #[arg(short, long)]
     codegen: bool,
+
+    /// Perform lexing, parsing, and assembly
+    /// generation, emit assembly to a file, but
+    /// stop before running the assembler
+    #[arg(short = 'S', long)]
+    emit_assembly: bool,
 }
 
 fn main() {
@@ -100,6 +106,13 @@ fn driver(driver_args: Args) -> Result<(), DriverError> {
 
     // If we were told to stop after the code gen phase, stop now
     if driver_args.codegen {
+        return Ok(());
+    }
+
+    // Emitting assembly to a file will go here
+
+    // If we were told to stop after emitting assembly, stop now
+    if driver_args.emit_assembly {
         return Ok(());
     }
 
