@@ -84,18 +84,21 @@ fn driver(driver_args: Args) -> Result<(), DriverError> {
         }
     );
 
+    // If we were told to stop after the lexer, stop now
     if driver_args.lex {
         return Ok(());
     }
 
     // Parsing will go here
 
+    // If we were told to stop after the parser, stop now
     if driver_args.parse {
         return Ok(());
     }
 
     // Codegen will go here
 
+    // If we were told to stop after the code gen phase, stop now
     if driver_args.codegen {
         return Ok(());
     }
