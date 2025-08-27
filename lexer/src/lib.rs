@@ -258,6 +258,9 @@ mod tests {
     fn test_tokenize_str_ugly_inputs() {
         use Token::*;
 
-        assert_eq!(tokenize_str("55555555555555555504"), Ok(vec![Constant("55555555555555555504".to_string())]));
+        assert_eq!(
+            tokenize_str("55555555555555555504"),
+            Ok(vec![Constant("55555555555555555504".to_string())])
+        );
     }
 }

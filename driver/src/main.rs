@@ -75,20 +75,16 @@ fn driver(driver_args: Args) -> Result<(), DriverError> {
         OsStr::new("-o"),
         &preprocessed_path,
     ];
-    run_gcc(args).map_err(|e|
-        DriverError {
-            msg: format!("Failed to run gcc preprocessing: {}.", e.msg),
-            ..e
-        }
-    )?;
+    run_gcc(args).map_err(|e| DriverError {
+        msg: format!("Failed to run gcc preprocessing: {}.", e.msg),
+        ..e
+    })?;
 
     println!("Tokenizing...");
-    let tokens = lexer::tokenize(preprocessed_path.as_os_str()).map_err(|_|
-        DriverError {
-            msg: "Lex step failed due to invalid token".to_string(),
-            exit_code: 1,
-        }
-    );
+    let tokens = lexer::tokenize(preprocessed_path.as_os_str()).map_err(|_| DriverError {
+        msg: "Lex step failed due to invalid token".to_string(),
+        exit_code: 1,
+    });
 
     // If we were told to stop after the lexer, stop now
     if driver_args.lex {
@@ -120,22 +116,24 @@ fn driver(driver_args: Args) -> Result<(), DriverError> {
     println!("Running stub compiler...");
     let mut assembly_path = OsString::from(output_path);
     assembly_path.push(".s");
-    let args = [OsStr::new("-S"), OsStr::new("-O"), &preprocessed_path, OsStr::new("-o"), &assembly_path];
-    run_gcc(args).map_err(|e|
-        DriverError {
-            msg: format!("Failed to compile: {}.", e.msg),
-            ..e
-        }
-    )?;
+    let args = [
+        OsStr::new("-S"),
+        OsStr::new("-O"),
+        &preprocessed_path,
+        OsStr::new("-o"),
+        &assembly_path,
+    ];
+    run_gcc(args).map_err(|e| DriverError {
+        msg: format!("Failed to compile: {}.", e.msg),
+        ..e
+    })?;
 
     // Assemble and link
     println!("Assembling and linking...");
-    run_gcc([&assembly_path, OsStr::new("-o"), output_path]).map_err(|e|
-        DriverError {
-            msg: format!("Failed to assemble and link: {}.", e.msg),
-            ..e
-        }
-    )?;
+    run_gcc([&assembly_path, OsStr::new("-o"), output_path]).map_err(|e| DriverError {
+        msg: format!("Failed to assemble and link: {}.", e.msg),
+        ..e
+    })?;
 
     Ok(())
 }
@@ -148,12 +146,13 @@ where
     // Uncomment to debug run_gcc command
     // let args = dbg!(args.into_iter().map(|s| s.as_ref().to_owned()).collect::<Vec<_>>());
 
-    let status = Command::new("gcc").args(args).status().map_err(|e|
-        DriverError {
+    let status = Command::new("gcc")
+        .args(args)
+        .status()
+        .map_err(|e| DriverError {
             exit_code: 1,
             msg: format!("{e}"),
-        }
-    )?;
+        })?;
 
     if !status.success() {
         // On Unix, status.code() returns None if the process was killed
@@ -176,8 +175,7 @@ where
 mod test {
     use super::*;
 
-    const BASIC_MAIN: &str =
-        concat!(env!("CARGO_MANIFEST_DIR"), "/../test_c_source/basic_main.c");
+    const BASIC_MAIN: &str = concat!(env!("CARGO_MANIFEST_DIR"), "/../test_c_source/basic_main.c");
 
     #[test]
     fn test_run_gcc() {
