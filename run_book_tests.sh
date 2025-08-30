@@ -1,7 +1,7 @@
 #!/bin/sh
 set -e
 
-cargo build
+cargo build -p driver
 
 test -d book_tests || {
     echo 'Cloning submodules.'
