@@ -84,7 +84,7 @@ fn driver(driver_args: Args) -> Result<(), DriverError> {
     let tokens = lexer::tokenize(preprocessed_path.as_os_str()).map_err(|_| DriverError {
         msg: "Lex step failed due to invalid token".to_string(),
         exit_code: 1,
-    });
+    })?;
 
     // If we were told to stop after the lexer, stop now
     if driver_args.lex {

@@ -5,4 +5,5 @@ edition = "2024"
 
 [dependencies]
 errors = { path = "../errors" }
+common = { path = "../common" }
 regex = "1.11.1"
