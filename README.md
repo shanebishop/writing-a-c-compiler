@@ -19,6 +19,14 @@ To pull submodules after an intial clone, run
 git submodule update --init --recursive
 ```
 
+## Set up Git hooks
+
+Git hooks should be set up right after cloning. To do so, run the following
+command in the root directory:
+```bash
+git config --local core.hooksPath .githooks/
+```
+
 ## Run tests
 
 To run unit tests, run `cargo test`.

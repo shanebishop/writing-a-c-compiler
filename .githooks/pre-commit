@@ -1,0 +1,7 @@
+#!/bin/sh
+cargo fmt --check || {
+    echo
+    echo 'cargo fmt --check failed.' 2>&1
+    echo 'To commit, either run cargo fmt and then commit, or commit with --no-verify.' 2>&1
+    exit 1
+}
