@@ -1,5 +1,5 @@
-use common::*;
 use errors::DriverError;
+use model::{Token, ast::*};
 
 pub fn parse(tokens: &[Token]) -> Result<Program, DriverError> {
     Ok(Program {

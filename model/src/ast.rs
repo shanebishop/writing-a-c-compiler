@@ -1,18 +1,4 @@
 #[derive(Debug, PartialEq)]
-pub enum Token {
-    Identifier(String),
-    Constant(String),
-    IntKeyword,
-    VoidKeyword,
-    ReturnKeyword,
-    OpenParenthesis,
-    CloseParenthesis,
-    OpenBrace,
-    CloseBrace,
-    Semicolon,
-}
-
-#[derive(Debug, PartialEq)]
 pub struct Program {
     pub func: Func,
 }

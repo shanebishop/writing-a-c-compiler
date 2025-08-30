@@ -5,7 +5,7 @@ edition = "2024"
 
 [dependencies]
 errors = { path = "../errors" }
-common = { path = "../common" }
+model = { path = "../model" }
 regex = "1.11.1"
 
 [lints]

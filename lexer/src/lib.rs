@@ -3,8 +3,8 @@ use std::cmp;
 use std::ffi::OsStr;
 use std::fs;
 
-use common::Token;
 use errors::DriverError;
+use model::Token;
 
 #[derive(Debug, PartialEq)]
 struct TokenInfo {

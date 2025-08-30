@@ -137,10 +137,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "b05b61dc5112cbb17e4b6cd61790d9845d13888356391624cbe7e41efeac1e75"
 
 [[package]]
-name = "common"
-version = "0.1.0"
-
-[[package]]
 name = "compiler-fuzz"
 version = "0.0.0"
 dependencies = [
@@ -201,8 +197,8 @@ dependencies = [
 name = "lexer"
 version = "0.1.0"
 dependencies = [
- "common",
  "errors",
+ "model",
  "regex",
 ]
 
@@ -229,6 +225,10 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "32a282da65faaf38286cf3be983213fcf1d2e2a58700e808f83f4ea9a4804bc0"
 
 [[package]]
+name = "model"
+version = "0.1.0"
+
+[[package]]
 name = "once_cell_polyfill"
 version = "1.70.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -238,9 +238,9 @@ checksum = "a4895175b425cb1f87721b59f0f286c2092bd4af812243672510e1ac53e2e0ad"
 name = "parser"
 version = "0.1.0"
 dependencies = [
- "common",
  "errors",
  "lexer",
+ "model",
 ]
 
 [[package]]
