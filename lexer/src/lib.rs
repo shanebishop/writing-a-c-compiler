@@ -62,6 +62,7 @@ static LEXER_MAP: std::sync::LazyLock<[LexerMapping; 10]> = std::sync::LazyLock:
 /// not require the capture.
 ///
 /// We need this function to work around unwraps not being allowed in static contexts.
+#[allow(clippy::unwrap_used)] // These regexes are statically known to be valid
 fn lexer_map() -> [LexerMapping; 10] {
     [
         (Regex::new(r"\A(int\b)").unwrap(), |_| Token::IntKeyword),

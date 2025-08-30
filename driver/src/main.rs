@@ -58,7 +58,7 @@ fn driver(driver_args: Args) -> Result<(), DriverError> {
     // > words, if you run ./YOUR_COMPILER /path/to/program.c, it should produce an
     // > executable at /path/to/program and terminate with an exit code of 0
     let input_dir = source_path.parent().unwrap_or(Path::new("/"));
-    // Unwrap is safe, due to is_file check above
+    #[allow(clippy::unwrap_used)] // Unwrap is safe, due to is_file check above
     let input_basename_stem = source_path.file_stem().map(Path::new).unwrap();
     let output_path = input_dir.join(input_basename_stem);
     let output_path = output_path.as_os_str();

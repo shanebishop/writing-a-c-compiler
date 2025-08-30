@@ -14,6 +14,7 @@ pub enum Comments {
 pub fn emit_code(asm: &Program, path: &OsStr, comments: Comments) -> Result<(), DriverError> {
     let file = File::options()
         .create(true)
+        .truncate(true)
         .write(true)
         .open(path)
         .map_err(|e| {
@@ -23,7 +24,7 @@ pub fn emit_code(asm: &Program, path: &OsStr, comments: Comments) -> Result<(), 
             ))
         })?;
     let mut writer = BufWriter::new(file);
-    write_asm(&asm, &mut writer, comments)
+    write_asm(asm, &mut writer, comments)
 }
 
 const WARNING_HEADER: &[u8; 272] =
