@@ -7,3 +7,6 @@ edition = "2024"
 errors = { path = "../errors" }
 common = { path = "../common" }
 regex = "1.11.1"
+
+[lints]
+workspace = true

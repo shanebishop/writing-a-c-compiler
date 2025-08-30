@@ -92,6 +92,11 @@ fn driver(driver_args: Args) -> Result<(), DriverError> {
     }
 
     // Parsing will go here
+    println!("Parsing...");
+    let ast = parser::parse(&tokens).map_err(|_| DriverError {
+        msg: "Parsing failed".to_string(),
+        exit_code: 1,
+    })?;
 
     // If we were told to stop after the parser, stop now
     if driver_args.parse {

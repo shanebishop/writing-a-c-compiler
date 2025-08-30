@@ -5,3 +5,10 @@ edition = "2024"
 
 [dependencies]
 common = { path = "../common" }
+errors = { path = "../errors" }
+
+[dev-dependencies]
+lexer = { path = "../lexer" }
+
+[lints]
+workspace = true

@@ -11,3 +11,24 @@ pub enum Token {
     CloseBrace,
     Semicolon,
 }
+
+#[derive(Debug, PartialEq)]
+pub struct Program {
+    pub func: Func,
+}
+
+#[derive(Debug, PartialEq)]
+pub struct Func {
+    pub name: String,
+    pub body: Vec<Statement>,
+}
+
+#[derive(Debug, PartialEq)]
+pub enum Statement {
+    Return(Expr),
+}
+
+#[derive(Debug, PartialEq)]
+pub enum Expr {
+    Constant(i64),
+}

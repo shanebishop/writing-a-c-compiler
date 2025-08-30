@@ -13,6 +13,15 @@ pub struct DriverError {
     pub msg: String,
 }
 
+impl DriverError {
+    pub fn with_err_msg(msg: &str) -> Self {
+        Self {
+            exit_code: 1,
+            msg: msg.to_string(),
+        }
+    }
+}
+
 impl From<io::Error> for DriverError {
     fn from(e: std::io::Error) -> Self {
         Self {

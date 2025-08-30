@@ -4,3 +4,15 @@ members = ["driver", "errors", "lexer", "parser", "fuzz", "common"]
 
 [profile.dev]
 debug = "line-tables-only" # For speeding up local builds; comment out for serious debugging
+
+[workspace.lints.rust]
+improper_ctypes = "deny"
+improper_ctypes_definitions = "deny"
+
+[workspace.lints.clippy]
+unwrap_used = "deny"
+expect_used = "deny"
+panic = "deny"
+ptr_as_ptr = "deny"
+ptr_cast_constness = "deny"
+cast_lossless = "deny"
