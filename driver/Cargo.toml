@@ -9,6 +9,7 @@ errors = { path = "../errors" }
 lexer = { path = "../lexer" }
 parser = { path = "../parser" }
 codegen = { path = "../codegen" }
+codeemit = { path = "../codeemit" }
 
 [lints]
 workspace = true

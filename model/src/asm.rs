@@ -1,3 +1,5 @@
+use std::fmt;
+
 #[derive(Debug, PartialEq)]
 pub struct Program {
     pub func: Func,
@@ -19,4 +21,17 @@ pub enum Instruction {
 pub enum Operand {
     Imm(i64),
     Register,
+}
+
+impl fmt::Display for Operand {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        use Operand::*;
+
+        match self {
+            Imm(v) => write!(f, "${v}")?,
+            Register => write!(f, "%eax")?,
+        }
+
+        Ok(())
+    }
 }

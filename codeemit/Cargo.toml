@@ -1,0 +1,11 @@
+[package]
+name = "codeemit"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+errors = { path = "../errors" }
+model = { path = "../model" }
+
+[lints]
+workspace = true

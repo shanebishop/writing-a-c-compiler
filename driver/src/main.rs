@@ -110,27 +110,15 @@ fn driver(driver_args: Args) -> Result<(), DriverError> {
     }
 
     // Emitting assembly to a file will go here
+    let mut assembly_path = OsString::from(output_path);
+    assembly_path.push(".s");
+    println!("Emitting assembly to {}...", assembly_path.display());
+    codeemit::emit_code(&asm, &assembly_path, codeemit::Comments::Include)?;
 
     // If we were told to stop after emitting assembly, stop now
     if driver_args.emit_assembly {
         return Ok(());
     }
-
-    // TODO Remove this stubbing
-    println!("Running stub compiler...");
-    let mut assembly_path = OsString::from(output_path);
-    assembly_path.push(".s");
-    let args = [
-        OsStr::new("-S"),
-        OsStr::new("-O"),
-        &preprocessed_path,
-        OsStr::new("-o"),
-        &assembly_path,
-    ];
-    run_gcc(args).map_err(|e| DriverError {
-        msg: format!("Failed to compile: {}.", e.msg),
-        ..e
-    })?;
 
     // Assemble and link
     println!("Assembling and linking...");
@@ -138,6 +126,8 @@ fn driver(driver_args: Args) -> Result<(), DriverError> {
         msg: format!("Failed to assemble and link: {}.", e.msg),
         ..e
     })?;
+
+    println!("Wrote final binary file to {}.", output_path.display());
 
     Ok(())
 }
@@ -261,7 +251,7 @@ mod test {
             err,
             DriverError {
                 exit_code: 1,
-                msg: "Failed to parse. See errors above.".to_string()
+                msg: "insufficient number of tokens for function definition".to_string()
             }
         );
     }
