@@ -93,10 +93,7 @@ fn driver(driver_args: Args) -> Result<(), DriverError> {
 
     // Parsing will go here
     println!("Parsing...");
-    let ast = parser::parse(&tokens).map_err(|_| DriverError {
-        msg: "Parsing failed".to_string(),
-        exit_code: 1,
-    })?;
+    let ast = parser::parse(&tokens)?;
 
     // If we were told to stop after the parser, stop now
     if driver_args.parse {
@@ -104,6 +101,8 @@ fn driver(driver_args: Args) -> Result<(), DriverError> {
     }
 
     // Codegen will go here
+    println!("Generating assembly representation...");
+    let asm = codegen::codegen(&ast);
 
     // If we were told to stop after the code gen phase, stop now
     if driver_args.codegen {

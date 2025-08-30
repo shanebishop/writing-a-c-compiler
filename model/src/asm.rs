@@ -17,6 +17,6 @@ pub enum Instruction {
 
 #[derive(Debug, PartialEq)]
 pub enum Operand {
-    Imm(usize),
+    Imm(i64),
     Register,
 }

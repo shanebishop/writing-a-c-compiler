@@ -8,6 +8,7 @@ clap = { version = "4.5.43", features = ["derive"] }
 errors = { path = "../errors" }
 lexer = { path = "../lexer" }
 parser = { path = "../parser" }
+codegen = { path = "../codegen" }
 
 [lints]
 workspace = true
