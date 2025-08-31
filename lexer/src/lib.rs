@@ -51,7 +51,7 @@ type LexerMapping = (Regex, fn(&str) -> Token);
 
 /// Map for tokenizing. Maps from tokenizer regex to closure for generating the token from the
 /// regex capture.
-static LEXER_MAP: std::sync::LazyLock<[LexerMapping; 10]> = std::sync::LazyLock::new(lexer_map);
+static LEXER_MAP: std::sync::LazyLock<[LexerMapping; 13]> = std::sync::LazyLock::new(lexer_map);
 
 /// Produces the map to be used in `LEXER_MAP`.
 ///
@@ -63,7 +63,7 @@ static LEXER_MAP: std::sync::LazyLock<[LexerMapping; 10]> = std::sync::LazyLock:
 ///
 /// We need this function to work around unwraps not being allowed in static contexts.
 #[allow(clippy::unwrap_used)] // These regexes are statically known to be valid
-fn lexer_map() -> [LexerMapping; 10] {
+fn lexer_map() -> [LexerMapping; 13] {
     [
         (Regex::new(r"\A(int\b)").unwrap(), |_| Token::IntKeyword),
         (Regex::new(r"\A(void\b)").unwrap(), |_| Token::VoidKeyword),
@@ -76,11 +76,14 @@ fn lexer_map() -> [LexerMapping; 10] {
         (Regex::new(r"\A([0-9]+\b)").unwrap(), |s| {
             Token::Constant(s.to_owned())
         }),
+        (Regex::new(r"\A(--)").unwrap(), |_| Token::DecrementOperator),
         (Regex::new(r"\A(\()").unwrap(), |_| Token::OpenParenthesis),
         (Regex::new(r"\A(\))").unwrap(), |_| Token::CloseParenthesis),
         (Regex::new(r"\A(\{)").unwrap(), |_| Token::OpenBrace),
         (Regex::new(r"\A(\})").unwrap(), |_| Token::CloseBrace),
         (Regex::new(r"\A(;)").unwrap(), |_| Token::Semicolon),
+        (Regex::new(r"\A(~)").unwrap(), |_| Token::BitwiseNot),
+        (Regex::new(r"\A(-)").unwrap(), |_| Token::Minus),
     ]
 }
 

@@ -10,6 +10,9 @@ pub enum Token {
     OpenBrace,
     CloseBrace,
     Semicolon,
+    BitwiseNot,
+    Minus,
+    DecrementOperator,
 }
 
 /// Contains Abstract Syntax Tree model data structures
