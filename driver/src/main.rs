@@ -93,7 +93,8 @@ fn driver(driver_args: Args) -> Result<(), DriverError> {
 
     // Parsing will go here
     println!("Parsing...");
-    let ast = parser::parse(&tokens)?;
+    let mut tokens = tokens.into_iter().peekable();
+    let ast = parser::parse(&mut tokens)?;
 
     // If we were told to stop after the parser, stop now
     if driver_args.parse {

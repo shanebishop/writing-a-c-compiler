@@ -4,7 +4,9 @@ pub fn codegen(ast: &ast::Program) -> Program {
     use Instruction::*;
 
     let func = &ast.func;
-    let ast::Statement::Return(ast::Expr::Constant(ret_val)) = func.body[0];
+    let ast::Statement::Return(ast::Expr::Constant(ret_val)) = func.body[0] else {
+        todo!();
+    };
 
     Program {
         func: Func {

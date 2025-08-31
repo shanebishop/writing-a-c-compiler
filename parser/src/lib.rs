@@ -1,45 +1,44 @@
 use errors::DriverError;
 use model::{Token, ast::*};
+use std::iter::Peekable;
 
-pub fn parse(tokens: &[Token]) -> Result<Program, DriverError> {
-    Ok(Program {
-        func: parse_function(tokens)?,
-    })
+pub fn parse(tokens: &mut Peekable<impl Iterator<Item = Token>>) -> Result<Program, DriverError> {
+    let func = parse_function(tokens)?;
+
+    if tokens.peek().is_some() {
+        return Err(DriverError::with_err_msg("Unexpected trailing tokens"));
+    }
+
+    Ok(Program { func })
 }
 
-fn parse_function(tokens: &[Token]) -> Result<Func, DriverError> {
+fn parse_function(tokens: &mut Peekable<impl Iterator<Item = Token>>) -> Result<Func, DriverError> {
     use Token::*;
 
-    if tokens.len() < 6 {
-        return Err(DriverError::with_err_msg(
-            "insufficient number of tokens for function definition",
-        ));
-    }
-
-    if !matches!(tokens[0], IntKeyword) {
+    if !matches!(tokens.next(), Some(IntKeyword)) {
         return Err(DriverError::with_err_msg("expected int return type"));
     }
-    let Identifier(ref fn_name) = tokens[1] else {
+    let Some(Identifier(ref fn_name)) = tokens.next() else {
         return Err(DriverError::with_err_msg("expected function name"));
     };
-    if !matches!(tokens[2], OpenParenthesis) {
-        return Err(DriverError::with_err_msg("expected open parenthesis"));
+    if !matches!(tokens.next(), Some(OpenParenthesis)) {
+        return Err(DriverError::with_err_msg("expected ("));
     }
-    if !matches!(tokens[3], VoidKeyword) {
+    if !matches!(tokens.next(), Some(VoidKeyword)) {
         return Err(DriverError::with_err_msg("expected void keyword"));
     }
-    if !matches!(tokens[4], CloseParenthesis) {
-        return Err(DriverError::with_err_msg("expected close parenthesis"));
+    if !matches!(tokens.next(), Some(CloseParenthesis)) {
+        return Err(DriverError::with_err_msg("expected )"));
     }
-    if !matches!(tokens[5], OpenBrace) {
-        return Err(DriverError::with_err_msg("expected open brace"));
-    }
-    #[allow(clippy::unwrap_used)] // Check for tokens being non-empty is above
-    if !matches!(tokens.last().unwrap(), CloseBrace) {
-        return Err(DriverError::with_err_msg("expected close brace"));
+    if !matches!(tokens.next(), Some(OpenBrace)) {
+        return Err(DriverError::with_err_msg("expected {"));
     }
 
-    let statement = parse_statement(&tokens[6..tokens.len() - 1])?;
+    let statement = parse_statement(tokens)?;
+
+    if !matches!(tokens.next(), Some(CloseBrace)) {
+        return Err(DriverError::with_err_msg("expected }"));
+    }
 
     Ok(Func {
         name: fn_name.clone(),
@@ -47,52 +46,77 @@ fn parse_function(tokens: &[Token]) -> Result<Func, DriverError> {
     })
 }
 
-fn parse_statement(tokens: &[Token]) -> Result<Statement, DriverError> {
+fn parse_statement(
+    tokens: &mut Peekable<impl Iterator<Item = Token>>,
+) -> Result<Statement, DriverError> {
     use Token::*;
 
-    if tokens.len() < 3 {
-        return Err(DriverError::with_err_msg(
-            "insufficient number of tokens for statement",
-        ));
-    }
-
-    if !matches!(tokens[0], ReturnKeyword) {
+    if !matches!(tokens.next(), Some(ReturnKeyword)) {
         return Err(DriverError::with_err_msg("expected return keyword"));
     }
-    #[allow(clippy::unwrap_used)] // tokens length check above
-    if !matches!(tokens.last().unwrap(), Semicolon) {
-        return Err(DriverError::with_err_msg("expected semi-colon"));
+
+    let expr = parse_expr(tokens)?;
+
+    if !matches!(tokens.next(), Some(Semicolon)) {
+        return Err(DriverError::with_err_msg("expected ;"));
     }
 
-    let expr = parse_expr(&tokens[1..2])?;
     Ok(Statement::Return(expr))
 }
 
-fn parse_expr(tokens: &[Token]) -> Result<Expr, DriverError> {
+fn parse_expr(tokens: &mut Peekable<impl Iterator<Item = Token>>) -> Result<Expr, DriverError> {
     use Token::*;
 
-    let &[Constant(ref val)] = tokens else {
-        return Err(DriverError::with_err_msg("illegal expression"));
+    let Some(next_token) = tokens.next() else {
+        return Err(DriverError::with_err_msg("malformed expression"));
     };
 
-    // For now, we ignore non-base 10 integer literals, literals with an annotation of the
-    // type (like 2l), etc.
-    let val: i64 = val.parse().map_err(|e| {
-        DriverError::with_err_msg(&format!("Failed to parse integral value {val}: {e}"))
-    })?;
+    match next_token {
+        Constant(val) => {
+            // For now, we ignore non-base 10 integer literals, literals with an annotation of the
+            // type (like 2l), etc.
+            let val: i64 = val.parse().map_err(|e| {
+                DriverError::with_err_msg(&format!("Failed to parse integral value {val}: {e}"))
+            })?;
 
-    Ok(Expr::Constant(val))
+            Ok(Expr::Constant(val))
+        }
+        BitwiseNot | Minus => {
+            let operator = if next_token == BitwiseNot {
+                UnaryOperator::BitwiseNot
+            } else {
+                UnaryOperator::Minus
+            };
+            let inner_expr = parse_expr(tokens)?;
+            Ok(Expr::UnaryOp {
+                op: operator,
+                expr: Box::new(inner_expr),
+            })
+        }
+        OpenParenthesis => {
+            let inner_expr = parse_expr(tokens)?;
+            if !matches!(tokens.peek(), Some(CloseParenthesis)) {
+                DriverError::with_err_msg("expected )");
+            }
+            let _ = tokens.next(); // Consume the close parenthesis
+            Ok(inner_expr)
+        }
+        _ => Err(DriverError::with_err_msg("malformed expression")),
+    }
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
-    use lexer::tokenize_str;
+
+    fn tokenize(s: &str) -> Result<Peekable<impl Iterator<Item = Token>>, DriverError> {
+        Ok(lexer::tokenize_str(s)?.into_iter().peekable())
+    }
 
     #[test]
     fn test_parse_function() -> Result<(), DriverError> {
         assert_eq!(
-            parse_function(&tokenize_str("int main(void) { return 2; }")?)?,
+            parse_function(&mut tokenize("int main(void) { return 2; }")?).unwrap(),
             Func {
                 name: "main".to_string(),
                 body: vec![Statement::Return(Expr::Constant(2))]
@@ -100,20 +124,28 @@ mod tests {
         );
 
         assert_eq!(
-            parse_function(&tokenize_str("void foo() {}")?).unwrap_err(),
+            parse_function(&mut tokenize("void foo() {}")?).unwrap_err(),
             DriverError::with_err_msg("expected int return type")
         );
 
-        assert_eq!(
-            parse_function(&[]).unwrap_err(),
-            DriverError::with_err_msg("insufficient number of tokens for function definition")
-        );
+        assert!(parse_function(&mut tokenize("")?).is_err());
 
         assert_eq!(
-            parse_function(&tokenize_str("int foo")?).unwrap_err(),
-            DriverError::with_err_msg("insufficient number of tokens for function definition")
+            parse_function(&mut tokenize("int foo")?).unwrap_err(),
+            DriverError::with_err_msg("expected (")
         );
 
+        Ok(())
+    }
+
+    #[test]
+    fn test_parse_simple_exprs() -> Result<(), DriverError> {
+        parse_expr(&mut tokenize("2")?).unwrap();
+        parse_expr(&mut tokenize("-2")?).unwrap();
+        parse_expr(&mut tokenize("~2")?).unwrap();
+        parse_expr(&mut tokenize("(2)")?).unwrap();
+        parse_expr(&mut tokenize("(-2)")?).unwrap();
+        parse_expr(&mut tokenize("~(-2)")?).unwrap();
         Ok(())
     }
 }

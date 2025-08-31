@@ -17,4 +17,11 @@ pub enum Statement {
 #[derive(Debug, PartialEq)]
 pub enum Expr {
     Constant(i64),
+    UnaryOp { op: UnaryOperator, expr: Box<Expr> },
+}
+
+#[derive(Debug, PartialEq)]
+pub enum UnaryOperator {
+    BitwiseNot,
+    Minus,
 }
