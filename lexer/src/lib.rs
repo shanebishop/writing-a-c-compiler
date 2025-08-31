@@ -15,11 +15,13 @@ struct TokenInfo {
 }
 
 #[derive(Debug, PartialEq)]
-pub struct LexError;
+pub struct LexError {
+    msg: String,
+}
 
 impl From<LexError> for DriverError {
-    fn from(_: LexError) -> Self {
-        todo!()
+    fn from(e: LexError) -> Self {
+        DriverError::with_err_msg(&e.msg)
     }
 }
 
@@ -37,7 +39,9 @@ pub fn tokenize_str(input: &str) -> Result<Vec<Token>, LexError> {
             input = input.trim_start_matches(char::is_whitespace);
         } else {
             let Some(token_info) = find_token(input) else {
-                return Err(LexError);
+                return Err(LexError {
+                    msg: "encountered invalid token".to_string(),
+                });
             };
             tokens.push(token_info.token);
             input = &input[cmp::min(token_info.len, input.len())..];
