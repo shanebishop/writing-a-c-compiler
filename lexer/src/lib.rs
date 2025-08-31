@@ -53,7 +53,7 @@ type LexerMapping = (Regex, fn(&str) -> Token);
 /// regex capture.
 static LEXER_MAP: std::sync::LazyLock<[LexerMapping; 10]> = std::sync::LazyLock::new(lexer_map);
 
-/// Produces the map to be used in `LEXER_MAP``.
+/// Produces the map to be used in `LEXER_MAP`.
 ///
 /// Each regex must follow the pattern `\A(<to capture>)`. The `\A` is important so that
 /// we only match the start of the string, rather than searching for a match in the
