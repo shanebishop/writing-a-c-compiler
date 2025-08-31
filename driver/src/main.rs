@@ -83,7 +83,7 @@ fn driver(driver_args: Args) -> Result<(), DriverError> {
     println!("Tokenizing...");
     let tokens = lexer::tokenize(preprocessed_path.as_os_str()).map_err(|e| DriverError {
         msg: format!("Lex step failed: {}", e.msg),
-        exit_code: 1,
+        ..e
     })?;
 
     // If we were told to stop after the lexer, stop now
