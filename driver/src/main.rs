@@ -21,6 +21,11 @@ struct Args {
     #[arg(short, long)]
     parse: bool,
 
+    /// Perform lexing, parsing, and TACKY AST,
+    /// but stop before assembly generation
+    #[arg(short, long)]
+    tacky: bool,
+
     /// Perform lexing, parsing, and assembly
     /// generation, but stop before code emission
     #[arg(short, long)]
@@ -91,7 +96,6 @@ fn driver(driver_args: Args) -> Result<(), DriverError> {
         return Ok(());
     }
 
-    // Parsing will go here
     println!("Parsing...");
     let mut tokens = tokens.into_iter().peekable();
     let ast = parser::parse(&mut tokens)?;
@@ -101,7 +105,13 @@ fn driver(driver_args: Args) -> Result<(), DriverError> {
         return Ok(());
     }
 
-    // Codegen will go here
+    println!("Generating TACKY...");
+    let tacky = ir_gen::ast_to_tacky(&ast);
+
+    if driver_args.tacky {
+        return Ok(());
+    }
+
     println!("Generating assembly representation...");
     let asm = codegen::codegen(&ast);
 
@@ -110,7 +120,6 @@ fn driver(driver_args: Args) -> Result<(), DriverError> {
         return Ok(());
     }
 
-    // Emitting assembly to a file will go here
     let mut assembly_path = OsString::from(output_path);
     assembly_path.push(".s");
     println!("Emitting assembly to {}...", assembly_path.display());

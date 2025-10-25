@@ -10,6 +10,7 @@ lexer = { path = "../lexer" }
 parser = { path = "../parser" }
 codegen = { path = "../codegen" }
 codeemit = { path = "../codeemit" }
+ir_gen = { path = "../ir_gen" }
 
 [lints]
 workspace = true

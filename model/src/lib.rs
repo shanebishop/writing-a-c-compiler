@@ -18,5 +18,8 @@ pub enum Token {
 /// Contains Abstract Syntax Tree model data structures
 pub mod ast;
 
+/// Contains TACKY (intermediate representation) model data structures
+pub mod tacky;
+
 /// Contains data structures for representing assembly
 pub mod asm;
